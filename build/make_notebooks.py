@@ -729,10 +729,10 @@ build script adds it to the map as "your run".
 Expect 20–60 minutes for the model pulls and the run. Nothing leaves the machine except the
 download to your browser.
 
-**What this is not.** The study ran Claude Haiku 4.5 / Sonnet 4.6 (frozen tiers) and, for
-shakedowns, DeepSeek V3.2. A 7–14 B open model on a T4 is a plumbing demonstration; it may plan
-poorly or fail a checkpoint. That is part of what the harness makes visible: the save gate still
-rejects invented ids, and the ledger still records every call.
+**What this is not.** Original study tests used primarily DeepSeek V3.2, while some used
+Claude Haiku 4.5 / Sonnet 4.6. Thus, Ollama may plan poorly or fail a checkpoint. That is part of
+what the harness makes visible: the save gate still rejects invented ids, and the ledger still
+records every call.
 """),
         md("## 1 · Harness at the pinned commit, plus its runtime dependencies"),
         TOKEN_CELL,
