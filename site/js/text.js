@@ -9,6 +9,16 @@ const PARADIGM_BLURB = {
   self: { name: 'self', title: 'A team that designs itself', one: 'A planner model designs its own team at run time: positions, briefs, who talks to whom, who submits. The harness checks the briefs for banned wording and loops, then runs the positions in dependency order. The planner may rebuild the team at each later checkpoint.', how: 'Direct model calls; the only topology whose shape is a per-run outcome.' },
 };
 
+function gateLabel(x) {
+  const g = x.gate || '';
+  if (!g || g === 'DOE_MAS_REPORT_TOOLS') return '';
+  if (/submitting/i.test(g)) return 'submitting stage only';
+  if (/OKF/.test(g)) return 'concept map on by default';
+  if (/QUERY_TOOL/.test(g)) return 'off by default';
+  if (/REPORT_TOOLS/.test(g)) return 'when the report tools are off';
+  return '';
+}
+
 function h(strings, ...vals) { return strings.map((s, i) => s + (vals[i] ?? '')).join(''); }
 
 export function renderStart(DATA) {
@@ -27,7 +37,7 @@ export function renderStart(DATA) {
   document.getElementById('tools-groups').innerHTML = t.tools.groups.map((g) => `
     <div class="tool-group"><h4>${esc(g.title)} <span class="muted">(${g.tools.length})</span></h4>
       ${g.blurb ? `<p class="muted small">${esc(g.blurb)}</p>` : ''}
-      <ul class="tool-list">${g.tools.map((n) => { const x = byName[n]; return `<li><details><summary><code>${esc(n)}</code> <span class="pill layer-${esc(x.layer)}">${esc(x.layer)}</span>${x.gate && x.gate !== 'DOE_MAS_REPORT_TOOLS' ? ` <span class="pill soft">${esc(x.gate.replace('DOE_MAS_', '').toLowerCase())}</span>` : ''}${x.terminal ? ' <span class="pill">ends the checkpoint</span>' : ''}</summary><p>${esc(x.purpose)}</p><p class="src">${esc(x.module)}</p></details></li>`; }).join('')}</ul></div>`).join('');
+      <ul class="tool-list">${g.tools.map((n) => { const x = byName[n]; return `<li><details><summary><code>${esc(n)}</code> <span class="pill layer-${esc(x.layer)}">${esc(x.layer)}</span>${gateLabel(x) ? ` <span class="pill soft">${esc(gateLabel(x))}</span>` : ''}${x.terminal ? ' <span class="pill">ends the checkpoint</span>' : ''}</summary><p>${esc(x.purpose)}</p><p class="src">${esc(x.module)}</p></details></li>`; }).join('')}</ul></div>`).join('');
   document.getElementById('tools-count').textContent = t.tools.n_tools;
   // mcp
   document.getElementById('mcp-doc').textContent = t.mcp.docstring;
