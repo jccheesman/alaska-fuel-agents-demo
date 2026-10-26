@@ -1,0 +1,135 @@
+{
+ "type": "object",
+ "properties": {
+  "n_requests": {
+   "const": 20
+  },
+  "requests": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "dest": {
+      "type": "string"
+     },
+     "dest_label": {
+      "type": "string"
+     },
+     "objectives": {
+      "type": "object",
+      "properties": {
+       "cost": {
+        "type": "object",
+        "properties": {
+         "baseline": {
+          "type": "object",
+          "properties": {
+           "geom": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "cost_per_gallon": {
+            "type": [
+             "number",
+             "null"
+            ]
+           },
+           "length_km": {
+            "type": [
+             "number",
+             "null"
+            ]
+           },
+           "n_edges": {
+            "type": "integer"
+           },
+           "uses_closed_edges": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           }
+          },
+          "required": [
+           "geom",
+           "cost_per_gallon",
+           "n_edges"
+          ]
+         },
+         "post_closure": {
+          "type": "object",
+          "properties": {
+           "geom": {
+            "type": [
+             "string",
+             "null"
+            ]
+           },
+           "cost_per_gallon": {
+            "type": [
+             "number",
+             "null"
+            ]
+           },
+           "length_km": {
+            "type": [
+             "number",
+             "null"
+            ]
+           },
+           "n_edges": {
+            "type": "integer"
+           },
+           "uses_closed_edges": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           }
+          },
+          "required": [
+           "geom",
+           "cost_per_gallon",
+           "n_edges"
+          ]
+         },
+         "outcome": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "baseline",
+         "post_closure",
+         "outcome"
+        ]
+       },
+       "length": {
+        "type": "object",
+        "properties": {}
+       }
+      },
+      "required": [
+       "cost",
+       "length"
+      ]
+     }
+    },
+    "required": [
+     "id",
+     "dest",
+     "objectives"
+    ]
+   }
+  }
+ },
+ "required": [
+  "requests",
+  "anchorage_nome_v1"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,334 @@
+{
+ "type": "object",
+ "properties": {
+  "order": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "runs": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "properties": {
+     "topology": {
+      "type": "string"
+     },
+     "run_id": {
+      "type": "string"
+     },
+     "checkpoints": {
+      "type": "object",
+      "properties": {
+       "plan": {
+        "type": "object",
+        "properties": {
+         "summary": {
+          "type": "string"
+         },
+         "routes": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "route_id": {
+             "type": "string"
+            },
+            "legs": {
+             "type": "array",
+             "items": {
+              "type": "object",
+              "properties": {
+               "mode": {
+                "type": "string"
+               },
+               "months": {
+                "type": "object",
+                "properties": {
+                 "start": {
+                  "type": "integer"
+                 },
+                 "end": {
+                  "type": "integer"
+                 }
+                }
+               },
+               "geom": {
+                "type": [
+                 "string",
+                 "null"
+                ]
+               },
+               "voided_hits": {
+                "type": "array",
+                "items": {
+                 "type": "string"
+                }
+               }
+              },
+              "required": [
+               "mode",
+               "months",
+               "voided_hits"
+              ]
+             }
+            }
+           },
+           "required": [
+            "route_id",
+            "legs"
+           ]
+          }
+         },
+         "coverage": {
+          "type": "object",
+          "properties": {
+           "served": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           },
+           "unserved": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           },
+           "remote": {
+            "type": "array"
+           }
+          }
+         },
+         "claims": {
+          "type": "array"
+         },
+         "revision_log": {
+          "type": "array"
+         },
+         "routes_through_voided": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "routes",
+         "coverage",
+         "claims",
+         "revision_log"
+        ]
+       },
+       "revision": {
+        "type": "object",
+        "properties": {
+         "summary": {
+          "type": "string"
+         },
+         "routes": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "route_id": {
+             "type": "string"
+            },
+            "legs": {
+             "type": "array",
+             "items": {
+              "type": "object",
+              "properties": {
+               "mode": {
+                "type": "string"
+               },
+               "months": {
+                "type": "object",
+                "properties": {
+                 "start": {
+                  "type": "integer"
+                 },
+                 "end": {
+                  "type": "integer"
+                 }
+                }
+               },
+               "geom": {
+                "type": [
+                 "string",
+                 "null"
+                ]
+               },
+               "voided_hits": {
+                "type": "array",
+                "items": {
+                 "type": "string"
+                }
+               }
+              },
+              "required": [
+               "mode",
+               "months",
+               "voided_hits"
+              ]
+             }
+            }
+           },
+           "required": [
+            "route_id",
+            "legs"
+           ]
+          }
+         },
+         "coverage": {
+          "type": "object",
+          "properties": {
+           "served": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           },
+           "unserved": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           },
+           "remote": {
+            "type": "array"
+           }
+          }
+         },
+         "claims": {
+          "type": "array"
+         },
+         "revision_log": {
+          "type": "array"
+         },
+         "routes_through_voided": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "routes",
+         "coverage",
+         "claims",
+         "revision_log"
+        ]
+       },
+       "reassessment": {
+        "type": "object",
+        "properties": {
+         "summary": {
+          "type": "string"
+         },
+         "routes": {
+          "type": "array",
+          "items": {
+           "type": "object",
+           "properties": {
+            "route_id": {
+             "type": "string"
+            },
+            "legs": {
+             "type": "array",
+             "items": {
+              "type": "object",
+              "properties": {
+               "mode": {
+                "type": "string"
+               },
+               "months": {
+                "type": "object",
+                "properties": {
+                 "start": {
+                  "type": "integer"
+                 },
+                 "end": {
+                  "type": "integer"
+                 }
+                }
+               },
+               "geom": {
+                "type": [
+                 "string",
+                 "null"
+                ]
+               },
+               "voided_hits": {
+                "type": "array",
+                "items": {
+                 "type": "string"
+                }
+               }
+              },
+              "required": [
+               "mode",
+               "months",
+               "voided_hits"
+              ]
+             }
+            }
+           },
+           "required": [
+            "route_id",
+            "legs"
+           ]
+          }
+         },
+         "coverage": {
+          "type": "object",
+          "properties": {
+           "served": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           },
+           "unserved": {
+            "type": "array",
+            "items": {
+             "type": "string"
+            }
+           },
+           "remote": {
+            "type": "array"
+           }
+          }
+         },
+         "claims": {
+          "type": "array"
+         },
+         "revision_log": {
+          "type": "array"
+         },
+         "routes_through_voided": {
+          "type": "integer"
+         }
+        },
+        "required": [
+         "routes",
+         "coverage",
+         "claims",
+         "revision_log"
+        ]
+       }
+      },
+      "required": [
+       "plan"
+      ]
+     }
+    },
+    "required": [
+     "run_id",
+     "checkpoints"
+    ]
+   }
+  }
+ },
+ "required": [
+  "order",
+  "runs",
+  "arm"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

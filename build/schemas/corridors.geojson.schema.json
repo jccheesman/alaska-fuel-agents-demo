@@ -1,0 +1,65 @@
+{
+ "type": "object",
+ "properties": {
+  "type": {
+   "const": "FeatureCollection"
+  },
+  "features": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "geometry": {
+      "type": "object",
+      "properties": {
+       "type": {
+        "enum": [
+         "LineString",
+         "MultiLineString"
+        ]
+       }
+      }
+     },
+     "properties": {
+      "type": "object",
+      "properties": {
+       "pid": {
+        "type": "string"
+       },
+       "mode": {
+        "enum": [
+         "road",
+         "barge",
+         "plane",
+         "ice_road",
+         "transfer"
+        ]
+       },
+       "months": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 4095
+       },
+       "voided": {
+        "type": "boolean"
+       }
+      },
+      "required": [
+       "pid",
+       "mode",
+       "months"
+      ]
+     }
+    },
+    "required": [
+     "geometry",
+     "properties"
+    ]
+   }
+  }
+ },
+ "required": [
+  "features"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

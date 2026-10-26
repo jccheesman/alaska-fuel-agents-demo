@@ -1,0 +1,60 @@
+{
+ "type": "object",
+ "properties": {
+  "skills": {
+   "type": "array",
+   "minItems": 5,
+   "maxItems": 5
+  },
+  "tools": {
+   "type": "object",
+   "properties": {
+    "n_tools": {
+     "const": 29
+    }
+   }
+  },
+  "okf": {
+   "type": "object",
+   "properties": {
+    "pages": {
+     "type": "object"
+    }
+   }
+  },
+  "adapters": {
+   "type": "object",
+   "properties": {
+    "rows": {
+     "type": "object",
+     "properties": {
+      "lin": {},
+      "crew": {},
+      "mass": {},
+      "self": {}
+     },
+     "required": [
+      "lin",
+      "crew",
+      "mass",
+      "self"
+     ]
+    }
+   }
+  },
+  "glossary": {
+   "type": "array",
+   "minItems": 10
+  }
+ },
+ "required": [
+  "skills",
+  "tools",
+  "okf",
+  "adapters",
+  "deliveries",
+  "mcp",
+  "glossary"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,52 @@
+name: Verify site
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Schema and size check
+        run: |
+          pip install -q jsonschema
+          python - <<'EOF'
+          import json, sys
+          from pathlib import Path
+          import jsonschema
+          out = Path("site/data"); total = 0; bad = []
+          for schema_path in sorted(Path("build/schemas").glob("*.schema.json")):
+              target = out / schema_path.name.replace(".schema.json", "")
+              if not target.exists():
+                  bad.append(f"{target.name}: missing"); continue
+              total += target.stat().st_size
+              try:
+                  jsonschema.validate(json.loads(target.read_text()), json.loads(schema_path.read_text()))
+              except jsonschema.ValidationError as e:
+                  bad.append(f"{target.name}: {e.message[:120]}")
+          print(f"site/data: {total/1e6:.2f} MB")
+          if total > 12e6: bad.append("size budget exceeded")
+          if bad:
+              print("\n".join(bad)); sys.exit(1)
+          EOF
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Headless walkthrough
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+          python -m http.server 8765 -d site --bind 127.0.0.1 &
+          sleep 1
+          node verify/screenshot_states.mjs --phone
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: verify/out

@@ -1,0 +1,43 @@
+{
+ "type": "object",
+ "properties": {
+  "n": {
+   "const": 1740
+  },
+  "facilities": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "pid": {
+      "pattern": "^facility:f\\d{6}$"
+     },
+     "lon": {
+      "type": "number"
+     },
+     "lat": {
+      "type": "number"
+     },
+     "hub_pid": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "voided": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "pid",
+     "lon",
+     "lat"
+    ]
+   }
+  }
+ },
+ "required": [
+  "facilities"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

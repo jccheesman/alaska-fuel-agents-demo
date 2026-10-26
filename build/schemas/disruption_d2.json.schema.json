@@ -1,0 +1,67 @@
+{
+ "type": "object",
+ "properties": {
+  "id": {
+   "const": "D2"
+  },
+  "notice_html": {
+   "type": "string"
+  },
+  "voided": {
+   "type": "object",
+   "properties": {
+    "hubs": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "facilities": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "corridors": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "edges": {
+     "type": "array",
+     "minItems": 3,
+     "maxItems": 3
+    }
+   },
+   "required": [
+    "hubs",
+    "facilities",
+    "corridors",
+    "edges"
+   ]
+  },
+  "edge_geoms": {
+   "type": "object"
+  },
+  "anchor": {
+   "type": "object",
+   "properties": {
+    "lon": {
+     "type": "number"
+    },
+    "lat": {
+     "type": "number"
+    }
+   }
+  }
+ },
+ "required": [
+  "notice_html",
+  "voided",
+  "edge_geoms",
+  "anchor",
+  "baseline_crossings"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

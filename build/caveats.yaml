@@ -1,0 +1,46 @@
+# Honest flags shown beside each archived report. Every line paraphrases the
+# arm's own read-out (run_archives/<arm>/FINDINGS.md and judge/) — nothing here
+# is a new judgement. Reports are shown exactly as the agents saved them.
+labels:
+  lin: "lin — fixed three-stage chain"
+  crew: "crew — five CrewAI roles"
+  mass: "mass — three MassGen peers who vote"
+  self: "self — a planner designs its own team"
+
+arm_notes:
+  - "All four runs finished all three checkpoints (plan, revision, reassessment) under fuse-mode caps; no cap bound any stage except the mass clock."
+  - "The task asks for the whole annual cycle; only mass planned all twelve months."
+  - "Three of the four rows 'rerouted' onto edge:e094423, a transfer edge the same notice voids; only mass left no leg on a voided edge after the notice."
+  - "Model: DeepSeek V3.2 on both tiers through OpenRouter, a plumbing shakedown rather than the frozen study tiers (Claude Haiku 4.5 / Sonnet 4.6)."
+
+lin:
+  plan:
+    - "Three routes to three of the twenty hubs (Nome, Unalakleet, Teller), July only; the other 89 facilities are listed as unserved: the smallest plan and the most honest coverage in the arm."
+  revision:
+    - "rt-001 and rt-002 were 'rerouted' from the closed edge:e097314 onto edge:e094423, which the same notice voids, so all three routes still cross the voided area."
+    - "One or two claims per report; nothing from the L3 library was cited."
+  reassessment:
+    - "Plan unchanged from the revision; the routes still cross the voided area."
+crew:
+  plan:
+    - "Four routes in January and July (winter by road and plane via Fairbanks, summer likewise; no barge), 132 facilities served, ten claims across four sections including a risk outlook and four recommendations."
+  revision:
+    - "Kept the four routes and added an October barge route to Nome (RT-005) through edge:e094423, which the notice voids; the receipt for RT-005 told the Writer the route crosses a voided cell."
+    - "Claimed 'the Port of Nome disruption affects only edge:e097314', which is false: the notice voids 19 elements."
+  reassessment:
+    - "Grew to 23 claims, 12 of them inferred; sourced share fell to 0.48."
+mass:
+  plan:
+    - "44 routes covering all twelve months and 132 facilities, 61 claims; 28 of the 44 routes are August barge runs, 12 end at the same node and four are exact duplicates."
+  revision:
+    - "Rerouted the Nome traffic through Teller (edge:e097321): the only row with no leg on a voided edge afterwards."
+    - "The saved summary reads 'Revision in progress … REMAINING TO DO', the live buffer of a peer the 7,200 s clock cut mid-task."
+  reassessment:
+    - "Dropped nine duplicate August Nome routes and added 26 ancillary claims from the released documents (26 L3 receipts cited); citation faith fell to 0.55."
+self:
+  plan:
+    - "One route, Anchorage to Nome by road, transfer, barge and transfer, in August only, while the summary says it delivers to all 20 hubs across a 12-month cycle. No claims."
+  revision:
+    - "Added a fifth leg that lands on edge:e094423, a transfer edge the notice voids. The route's facilities list grew to 115 through hub expansion."
+  reassessment:
+    - "The one report in the arm that cites both passages the harness pushed at the unlock, in two ancillary claims."

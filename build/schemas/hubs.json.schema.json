@@ -1,0 +1,63 @@
+{
+ "type": "object",
+ "properties": {
+  "n": {
+   "const": 329
+  },
+  "origin": {
+   "type": "string"
+  },
+  "nome": {
+   "type": "string"
+  },
+  "destinations": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "hubs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "pid": {
+      "pattern": "^hub:h\\d{6}$"
+     },
+     "lon": {
+      "type": "number",
+      "maximum": -126,
+      "minimum": -200
+     },
+     "lat": {
+      "type": "number",
+      "minimum": 50,
+      "maximum": 72
+     },
+     "role": {
+      "enum": [
+       "origin",
+       "destination",
+       null
+      ]
+     },
+     "voided": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "pid",
+     "lon",
+     "lat",
+     "name",
+     "region"
+    ]
+   }
+  }
+ },
+ "required": [
+  "hubs",
+  "destinations"
+ ],
+ "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

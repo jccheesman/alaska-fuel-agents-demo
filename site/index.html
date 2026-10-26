@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alaska Fuel Agents Demo</title>
+<meta name="description" content="A teaching demo of the agentic harness built around Alaska's fuel-delivery network: skills, MCP tools, four agent paradigms, and a map of deliveries before and after a storm closes the Port of Nome.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
+<link rel="stylesheet" href="css/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%231f5f7a'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23eb6834'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#start">Skip to content</a>
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span>Alaska Fuel Agents</a>
+    <nav aria-label="Sections">
+      <a href="#start">Start here</a>
+      <a href="#paradigms">Four paradigms</a>
+      <a href="#lifecycle">Life of a run</a>
+      <a href="#map-section">The map</a>
+      <a href="#results">What the agents did</a>
+      <a href="#try">Try it</a>
+      <a href="#about">About</a>
+    </nav>
+    <button type="button" id="theme-toggle" class="ghost">Dark theme</button>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero wrap">
+  <p class="eyebrow">A teaching demo · University of Alaska Fairbanks · Department of Energy</p>
+  <h1>What can a team of AI agents do with a fuel-supply network, and how do we find out?</h1>
+  <p class="lede">This page walks through one research harness: real data about how fuel reaches Alaska's communities, a set of tools agents may call, five written skills, four ways of organising an agent team, and a storm that closes the Port of Nome halfway through the job. The map in the middle shows the deliveries before the storm, the moment the plan breaks, the correct reroute, and what the agents actually produced.</p>
+  <p id="load-status" class="status" role="status">loading data…</p>
+  <div class="hero-links">
+    <a class="btn" href="#map-section" data-goto="baseline">Open the map</a>
+    <a class="btn ghost" href="#start">Read the overview first</a>
+  </div>
+</section>
+
+<section id="start" class="wrap section">
+  <h2>Start here: six words you will meet</h2>
+  <div class="defs">
+    <article class="def">
+      <h3>Agent</h3>
+      <p>A language model given a goal, a set of tools and a loop: it reads, decides to call a tool, reads the result, and repeats until it submits something. Here the goal is a fuel-delivery plan and the tools answer questions about a network database.</p>
+    </article>
+    <article class="def">
+      <h3>Harness</h3>
+      <p>Everything around the model that makes the work auditable and fair. It decides what data an agent may see and when (layers L1, L2, L3), logs every tool call with a receipt id, refuses reports with invented ids or unbacked citations, freezes every file an agent sees, and scores the result the same way for every team.</p>
+    </article>
+    <article class="def">
+      <h3>Skill</h3>
+      <p>A short written procedure, a <code>SKILL.md</code> file, that tells an agent how to do one job well: orient in the data, plan routes, revise under a disruption, reassess with late context, build and submit the report. Skills are shown only when their tools and data layer are available.</p>
+    </article>
+    <article class="def">
+      <h3>Tool</h3>
+      <p>A function the agent can call by name with arguments. There are <span id="tools-count">29</span>: a handful to look things up and route, a dozen to build the report piece by piece, two for the disruption, three for the context documents. Every call returns a receipt (<code>r-0042</code>) that a claim can cite.</p>
+    </article>
+    <article class="def">
+      <h3>MCP server</h3>
+      <p>The Model Context Protocol is a standard way to offer tools to any agent framework. The harness serves exactly the same tools over MCP (standard input and output, one process) as it does in-process, and a test asserts the two lists are byte-identical.</p>
+    </article>
+    <article class="def">
+      <h3>OKF concept map</h3>
+      <p>The network as linked, versioned text pages (the Open Knowledge Format layer): a start page, an ontology, one page per region, hub, corridor and month, each stamped with the database hash it was built from. An agent reads one page per call and can copy its ids verbatim.</p>
+    </article>
+  </div>
+
+  <h3 class="sub">The five skills, as the agents read them</h3>
+  <p class="muted">Each card's header is the skill's own front matter. Open one to read the full procedure.</p>
+  <div id="skills-grid" class="grid-2"></div>
+
+  <h3 class="sub">The tools, grouped by the layer that unlocks them</h3>
+  <p class="muted">Descriptions are the tool docstrings, the same text every framework hands the model. A tool outside the run's current layers answers exactly like a tool that does not exist.</p>
+  <div id="tools-groups" class="tools"></div>
+
+  <div class="two-col">
+    <div>
+      <h3 class="sub">The MCP server, in its own words</h3>
+      <p class="muted">Server name <code id="mcp-name"></code>. The module docstring from <code>agentic_harness_workflow/mcp_server.py</code>:</p>
+      <pre id="mcp-doc" class="doc"></pre>
+      <pre class="doc small"><code># list the surface a run currently offers
+DOE_MAS_RUN_DIR=/path/to/run python -m agentic_harness_workflow.mcp_server --list</code></pre>
+    </div>
+    <div>
+      <h3 class="sub">The concept map (OKF), one page at a time</h3>
+      <p class="muted">Pages indexed: <span id="okf-kinds"></span></p>
+      <div id="okf-tabs" class="tabs" role="tablist"></div>
+      <div id="okf-page" class="okf"></div>
+    </div>
+  </div>
+
+  <details class="wide">
+    <summary>The data guide the agents receive (what the numbers mean)</summary>
+    <div id="data-guide" class="md"></div>
+  </details>
+  <details class="wide">
+    <summary>Glossary from the study's archive</summary>
+    <dl id="glossary" class="gl-list"></dl>
+  </details>
+</section>
+
+<section id="paradigms" class="wrap section">
+  <h2>Four ways to organise the same agents</h2>
+  <p class="lede-sm">Every team gets the same task text, the same tools, the same skills, the same models and the same budgets. Only the shape of the team differs, and the one paragraph that tells each agent where it sits. The study asks whether that shape changes what gets planned.</p>
+  <div id="paradigm-grid" class="grid-2"></div>
+  <details class="wide">
+    <summary>The shared opening every agent reads (the "spine")</summary>
+    <div id="spine" class="md"></div>
+  </details>
+</section>
+
+<section id="lifecycle" class="wrap section">
+  <h2>The life of a run</h2>
+  <p class="lede-sm">One run is one team working one task through three checkpoints. The harness releases information in layers, the way it arrives in real planning: the network first, then a disruption, then the slower socio-economic context.</p>
+  <ol id="lifecycle" class="steps"></ol>
+</section>
+
+<section id="map-section" class="section map-section">
+  <div class="wrap">
+    <h2>The map: before, the break, the reroute, the agents</h2>
+    <p class="lede-sm">Anchorage supplies twenty hubs in the Bering Straits region. Walk the four states left to right. Hover anything for the ids the agents work with; every view has a link you can share.</p>
+  </div>
+  <div class="state-bar wrap" role="tablist" aria-label="Map state">
+    <button type="button" data-state-btn="baseline"><span class="n">1</span>Before the storm</button>
+    <button type="button" data-state-btn="disruption"><span class="n">2</span>The storm hits</button>
+    <button type="button" data-state-btn="after"><span class="n">3</span>Reference reroute</button>
+    <button type="button" data-state-btn="reassessment"><span class="n">4</span>What the agents did</button>
+  </div>
+  <div class="map-grid wrap">
+    <div class="map-col">
+      <div id="map-controls" class="controls"></div>
+      <div id="map" class="map" role="region" aria-label="Interactive map of Alaska fuel delivery routes"></div>
+      <div id="map-legend" class="legend"></div>
+    </div>
+    <aside id="map-panel" class="panel" aria-live="polite"></aside>
+  </div>
+</section>
+
+<section id="results" class="wrap section">
+  <h2>What the agents actually did</h2>
+  <p class="lede-sm">One archived arm, <code id="arm-name"></code>: one finished run per paradigm on the Bering Straits task, DeepSeek V3.2 on both model tiers. The reports are shown as saved. The judge is a separate model scoring each report blind.</p>
+  <div class="tbl wide"><table id="results-table" class="results"></table></div>
+  <h3 class="sub">What the study's own read-out concluded</h3>
+  <ul id="arm-notes" class="notes"></ul>
+  <h3 class="sub">The harness's rendered revision maps</h3>
+  <div id="overview-pngs" class="figs"></div>
+  <p class="hint">Jump to a report on the interactive map: <a href="#map-section" data-goto="reassessment?topo=lin&cp=revision">lin, revision</a> · <a href="#map-section" data-goto="reassessment?topo=crew&cp=revision">crew, revision</a> · <a href="#map-section" data-goto="reassessment?topo=mass&cp=reassessment">mass, reassessment</a> · <a href="#map-section" data-goto="reassessment?topo=self&cp=revision">self, revision</a></p>
+</section>
+
+<section id="try" class="wrap section">
+  <h2>Try it yourself</h2>
+  <p class="lede-sm">Three Colab notebooks, no virtual machine needed. The first two need no language model at all.</p>
+  <div class="grid-3">
+    <article class="card nb">
+      <h3>1 · DuckDB on the real network</h3>
+      <p>Open <code>fuel_network.duckdb</code> directly: tables, the <code>passable_edges</code> macro and views, routing with the <b>duckrouting</b> extension (Anchorage → Nome before and after the closure), graph analytics with <b>Onager</b>, <b>H3</b> tiles, the spatial extension, DuckPGQ and full-text search.</p>
+      <p><a class="btn" href="https://colab.research.google.com/github/jccheesman/alaska-fuel-agents-demo/blob/main/notebooks/00_duckdb_fuel_network.ipynb">Open in Colab</a> <a class="ghost-link" href="https://github.com/jccheesman/alaska-fuel-agents-demo/blob/main/notebooks/00_duckdb_fuel_network.ipynb">view source</a></p>
+    </article>
+    <article class="card nb">
+      <h3>2 · Call the agents' tools</h3>
+      <p>List the MCP surface, call <code>describe</code>, <code>resolve("Nome")</code>, <code>route</code>, deliver the D2 notice yourself and watch <code>check_disruption_impact</code> appear. Every call leaves a receipt in <code>tool_log.jsonl</code>, exactly as it does for an agent.</p>
+      <p><a class="btn" href="https://colab.research.google.com/github/jccheesman/alaska-fuel-agents-demo/blob/main/notebooks/01_explore_the_tools.ipynb">Open in Colab</a> <a class="ghost-link" href="https://github.com/jccheesman/alaska-fuel-agents-demo/blob/main/notebooks/01_explore_the_tools.ipynb">view source</a></p>
+    </article>
+    <article class="card nb">
+      <h3>3 · Run the linear team with an open model</h3>
+      <p>On a free GPU runtime: install Ollama, pull an open-weight model, and run the <code>lin</code> chain through plan, disruption and reassessment. Download the run folder and the build script adds it to this map as "your run".</p>
+      <p><a class="btn" href="https://colab.research.google.com/github/jccheesman/alaska-fuel-agents-demo/blob/main/notebooks/02_run_lin_with_ollama.ipynb">Open in Colab</a> <a class="ghost-link" href="https://github.com/jccheesman/alaska-fuel-agents-demo/blob/main/notebooks/02_run_lin_with_ollama.ipynb">view source</a></p>
+    </article>
+  </div>
+  <p class="muted small">The harness repository is private while the study is under way, so the notebooks read a fine-grained, read-only GitHub token from Colab's Secrets panel (name it <code>GH_TOKEN</code>). Nothing is written back.</p>
+  <h3 class="sub">How to read a receipt</h3>
+  <pre class="doc small"><code>{"ts": "2026-10-22T19:41:08+00:00", "tool": "route", "layer": "L1",
+ "args": {"hubs": ["hub:h000698", "hub:h000493"], "month": 9}, "args_sha256": "84ef…",
+ "agent_label": "stage-2", "checkpoint": "plan", "bytes_returned": 1812,
+ "r_ids": ["r-0037"], "error": null, "result_sha256": "28c0…", "result_path": "tool_results/r-0037.json"}</code></pre>
+  <p>One line of <code>tool_log.jsonl</code>, lightly abbreviated. The full result sits under <code>tool_results/r-0037.json</code>. A claim in the report that says <i>cites: ["r-0037"]</i> is checked against exactly this line: the scorer asks whether the run ever received it, and the judge asks whether it supports the sentence.</p>
+</section>
+
+<section id="about" class="wrap section">
+  <h2>About and provenance</h2>
+  <div class="two-col">
+    <div>
+      <p>Built from the harness repository <code>jccheesman/agentic_harness_for_alaska_fuel_network</code>, branch <code id="prov-branch"></code>, commit <code id="prov-commit"></code>, database <code id="prov-db"></code>. Nothing on this page is edited by hand from those files: a build script reads the pinned commit and writes the small data files the page loads. Built <span id="prov-built"></span>.</p>
+      <p id="prov-counts"></p>
+      <p>The network itself comes from the public data repository <a href="https://github.com/jccheesman/alaska-fuel-spatial-network">alaska-fuel-spatial-network</a>: friction surfaces (river and sea ice, permafrost, slope, land cover), a multimodal transport graph, and modelled per-edge monthly costs. Edge costs are modelled values, not observed prices.</p>
+      <p>Authors of the harness and study: Julia Cheesman, Erin Trochim, Diego Arias Arana (University of Alaska Fairbanks; Department of Energy). Demo code is MIT-licensed; demo text and derived data are CC BY 4.0. Agent reports are AI-generated and reproduced verbatim as research records, not as advice. Third-party documents the agents read at layer L3 are not reproduced here.</p>
+    </div>
+    <div>
+      <h3 class="sub">Key terms from the harness README</h3>
+      <dl id="key-terms" class="gl-list"></dl>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="wrap foot">
+  <p>Coastline: Natural Earth (public domain). Map rendering: MapLibre GL JS (BSD). Source for this page: <a href="https://github.com/jccheesman/alaska-fuel-agents-demo">github.com/jccheesman/alaska-fuel-agents-demo</a>.</p>
+</footer>
+<script src="vendor/maplibre-gl/maplibre-gl.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
