@@ -6,8 +6,9 @@ on:
     branches: [main]
 
 jobs:
-  verify:
+  schemas:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,15 +36,19 @@ jobs:
           if bad:
               print("\n".join(bad)); sys.exit(1)
           EOF
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Headless walkthrough
+
+  walkthrough:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.49.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Headless walkthrough of the map states
         run: |
           npm install --no-save playwright@1.49.1
-          npx playwright install --with-deps chromium
-          python -m http.server 8765 -d site --bind 127.0.0.1 &
-          sleep 1
+          python3 -m http.server 8765 -d site --bind 127.0.0.1 &
+          sleep 2
           node verify/screenshot_states.mjs --phone
       - uses: actions/upload-artifact@v4
         if: always()
