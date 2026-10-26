@@ -98,7 +98,7 @@ function reassessmentPanel(S) {
   const claims = ck.claims.slice(0, 40).map((c) => `<li><span class="tag tag-${esc(c.class)}">${esc(c.class)}</span> <span class="tag">${esc(c.section)}</span> ${esc(c.text)}${c.cites?.length ? ` <span class="muted">cites ${c.cites.map(esc).join(', ')}</span>` : ''}</li>`).join('');
   const log = ck.revision_log.length ? ck.revision_log.map((l) => `<li><b>${esc(l.action)}</b> ${esc(l.claim_id)}${l.rationale_claims?.length ? ` <span class="muted">(because ${l.rationale_claims.map(esc).join(', ')})</span>` : ''}</li>`).join('') : '<li class="muted">empty log</li>';
   const routeRows = (sel ? [sel] : ck.routes).map((r) => `<tr class="${r.legs.some((l) => l.voided_hits.length) ? 'aff' : ''}"><td>${esc(r.route_id)}</td><td>${r.legs.map((l) => `<i class="sw sw-${l.mode}" title="${MODE_LABEL[l.mode]}"></i>`).join('')}</td><td>${esc([...new Set(r.legs.map((l) => monthSpan(l.months)))].join(', '))}</td><td class="num">${fmtUsd(r.cost_per_gallon, 2)}</td><td class="num">${r.facilities_served.length}</td><td>${r.legs.some((l) => l.voided_hits.length) ? '<span class="bad">voided edge</span>' : ''}</td></tr>`).join('');
-  const judge = run.judge ? `${run.judge[s.cp] ?? '–'} / 4` : '–';
+  const judge = run.judge ? `${run.judge[s.cp] ?? '–'} / 4 (run mean ${run.judge.run_mean ?? '–'})` : '–';
   return `<h3>${esc(run.label)} · ${esc(s.cp)} report</h3>
     <p class="verbatim">AI-generated report (${esc(run.model)}), shown exactly as saved on ${s.cp === 'plan' ? 'the first' : s.cp === 'revision' ? 'the second' : 'the third'} checkpoint of ${esc(run.run_id)}. Mistakes are part of the record.</p>
     <div class="kv">

@@ -7,6 +7,15 @@ import { renderPanel } from './panels.js';
 export const STATES = ['baseline', 'disruption', 'after', 'reassessment'];
 const DEFAULTS = { state: 'baseline', month: 9, obj: 'cost', req: 'all', topo: 'lin', cp: 'revision', fac: '0', modes: 'all' };
 
+// The default team shown on the fourth state is the run the blind judge
+// scored highest; app.js sets it once the results are loaded.
+export function setDefaultTopo(topo) { DEFAULTS.topo = topo; }
+export function bestTopo(DATA) {
+  const rows = DATA.results.rows.filter((r) => r.judge_mean != null && r.topology !== 'fresh');
+  rows.sort((a, b) => b.judge_mean - a.judge_mean);
+  return rows[0]?.topology || 'lin';
+}
+
 export function parseHash() {
   const h = location.hash.replace(/^#/, '');
   if (!h.startsWith('map')) return { ...DEFAULTS };
@@ -158,7 +167,8 @@ export class MapStates {
       ? (DATA.runs.runs[s.topo]?.checkpoints[s.cp]?.routes || []).map((r) => [r.route_id, `${r.route_id} · ${r.legs.length} leg${r.legs.length > 1 ? 's' : ''}${r.legs.some((l) => l.voided_hits.length) ? ' ⚠' : ''}`])
       : DATA.reference.requests.map((r) => [r.dest, `${r.dest_label} (${r.dest.replace('hub:', '')})`]);
     const reqLabel = s.state === 'reassessment' ? 'Route' : 'Delivery';
-    const topoOpts = DATA.runs.order.map((t) => [t, DATA.runs.runs[t].label]);
+    const best = bestTopo(DATA);
+    const topoOpts = DATA.runs.order.map((t) => [t, DATA.runs.runs[t].label + (t === best ? ' · highest judge score' : '')]);
     els.controls.innerHTML = `
       <div class="ctl">
         <label for="ctl-month">Month <span class="ctl-val">${MONTHS[s.month - 1]}</span></label>

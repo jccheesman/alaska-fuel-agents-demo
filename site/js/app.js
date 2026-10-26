@@ -1,6 +1,6 @@
 import { loadAll } from './data.js';
 import { createMap } from './map.js';
-import { MapStates, STATES } from './states.js';
+import { MapStates, STATES, bestTopo, setDefaultTopo } from './states.js';
 import { renderStart, renderParadigms, renderLifecycle, renderResults, renderAbout } from './text.js';
 
 function setupTheme(onChange) {
@@ -41,6 +41,7 @@ async function main() {
   renderResults(DATA);
   renderAbout(DATA);
 
+  setDefaultTopo(bestTopo(DATA));   // the fourth state opens on the highest-scoring team
   const mapApi = createMap('map', DATA);
   const S = new MapStates(DATA, mapApi, {
     controls: document.getElementById('map-controls'),
