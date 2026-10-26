@@ -6,32 +6,71 @@ const SHORT = { lin: 'lin', crew: 'crew', mass: 'mass', self: 'self', fresh: 'yo
 
 function id(s) { return `<code>${esc(s)}</code>`; }
 
+function carrier(DATA, gid) {
+  const g = DATA.geoms[gid];
+  if (!g) return '?';
+  const m = g.modes;
+  if (m.barge) return 'barge';
+  if (m.ice_road) return 'ice road';
+  if (m.plane) return 'plane';
+  return 'road';
+}
+
 function baselinePanel(S) {
   const { DATA, s } = S;
   const ref = DATA.reference;
   const sel = s.req !== 'all' ? DATA.reqByDest[s.req] : null;
   const byMonth = DATA.prov.passable_edges_by_month;
   const m = s.month;
-  const seasonal = `In ${MONTHS[m - 1]}: ${fmtInt(byMonth.barge[m - 1])} barge edges, ${fmtInt(byMonth.ice_road[m - 1])} ice-road edges, ${fmtInt(byMonth.road[m - 1])} road edges are passable.`;
+  const mon = MONTHS[m - 1];
+  const seasonal = `In ${mon}: ${fmtInt(byMonth.barge[m - 1])} barge edges, ${fmtInt(byMonth.ice_road[m - 1])} ice-road edges, ${fmtInt(byMonth.road[m - 1])} road edges are passable.`;
+  const monthly = s.obj === 'cost' ? ref.monthly?.[String(m)] : null;
+  // per-month tally: how the cheapest deliveries travel this month
+  let tally = '';
+  if (monthly) {
+    const counts = { barge: 0, 'ice road': 0, plane: 0, road: 0 };
+    let reachable = 0;
+    const unreachable = [];
+    for (const r of ref.requests) {
+      const o = monthly[r.dest];
+      if (!o) { unreachable.push(r.dest_label); continue; }
+      reachable += 1; counts[carrier(DATA, o.geom)] += 1;
+    }
+    const parts = Object.entries(counts).filter(([, n]) => n).map(([k, n]) => `${n} by ${k}`).join(', ');
+    tally = `<p><b>${mon}:</b> ${reachable} of ${ref.n_requests} hubs are reachable from Anchorage; the cheapest delivery goes ${parts}.` +
+      `${unreachable.length ? ` Unreachable this month: ${unreachable.map(esc).join(', ')}.` : ''}</p>`;
+  }
   let detail = '';
   if (sel) {
-    const o = sel.objectives[s.obj].baseline;
-    detail = `<div class="kv"><div><span>Delivery</span><b>Anchorage → ${esc(sel.dest_label)}</b></div>
-      <div><span>Hub</span>${id(sel.dest)}</div>
-      <div><span>${s.obj === 'cost' ? 'Cost' : 'Cost (shortest path)'}</span><b>${fmtUsd(o.cost_per_gallon, 3)}/gal</b></div>
-      <div><span>Length</span>${fmtKm(o.length_km)} · ${fmtInt(o.n_edges)} edges</div>
-      <div><span>Modes</span>${modesOf(DATA, o.geom)}</div>
-      <div><span>Last edge</span>${id(o.last_edge)}</div></div>`;
+    const o = monthly ? monthly[sel.dest] : sel.objectives[s.obj].baseline;
+    if (!o) {
+      detail = `<p class="callout warn"><b>${esc(sel.dest_label)}</b> cannot be reached from Anchorage in ${mon}: every path needs a corridor that is closed that month.</p>`;
+    } else {
+      detail = `<div class="kv"><div><span>Delivery</span><b>Anchorage → ${esc(sel.dest_label)}</b> in ${mon}</div>
+        <div><span>Hub</span>${id(sel.dest)}</div>
+        <div><span>${s.obj === 'cost' ? 'Cost' : 'Cost (shortest path)'}</span><b>${fmtUsd(o.cost_per_gallon, 3)}/gal</b></div>
+        <div><span>Length</span>${fmtKm(o.length_km)} · ${fmtInt(o.n_edges)} edges</div>
+        <div><span>Modes</span>${modesOf(DATA, o.geom)}</div>
+        ${o.last_edge ? `<div><span>Last edge</span>${id(o.last_edge)}</div>` : ''}</div>`;
+      if (monthly && m !== 9) {
+        const sep = sel.objectives.cost.baseline;
+        detail += `<p class="muted small">September, for comparison: ${fmtUsd(sep.cost_per_gallon, 3)}/gal by ${esc(carrier(DATA, sep.geom))}, ${fmtKm(sep.length_km)}.</p>`;
+      }
+    }
   } else {
-    const costs = ref.requests.map((r) => r.objectives[s.obj].baseline.cost_per_gallon);
+    const costs = ref.requests.map((r) => (monthly ? monthly[r.dest] : r.objectives[s.obj].baseline)).filter(Boolean).map((o) => o.cost_per_gallon);
     detail = `<div class="kv"><div><span>Deliveries</span><b>${ref.n_requests}</b> hubs from Anchorage</div>
       <div><span>$/gal range</span>${fmtUsd(Math.min(...costs), 2)} – ${fmtUsd(Math.max(...costs), 2)}</div>
       <div><span>Scope</span>136 facilities in the Bering Straits region</div></div>`;
   }
+  const routesNote = monthly
+    ? `<p>The colored routes are the <b>cheapest path for ${mon}</b> from the Anchorage supplier to each hub, computed with the harness's own router over that month's passable edges. In summer the cheapest Nome delivery goes by road to a dock, transfers to a barge and sails around the coast; once the barge corridors freeze, the router flies or stays on the road.</p>`
+    : `<p>The colored routes are the <b>shortest paths</b> (the diagnostic objective), computed for September. Switch to "Cheapest $/gal" to see the delivery that minimises cost, month by month.</p>`;
   return `<h3>The network the agents can query</h3>
     <p>Every line is a <b>corridor</b>: a run of edges between two hubs with one mode. Barge corridors open in open water, ice roads only January to March, roads and air all year. The straight-looking lines are drawn from node to node; the real geometry lives in shapefiles the agents never see either.</p>
     <p class="muted">${seasonal}</p>
-    <p>The colored routes are the <b>reference answers</b>: the cheapest (or shortest) September path from the Anchorage supplier to each of the 20 Bering Straits hubs, computed by the harness's own router. The cheapest Anchorage → Nome delivery goes by road to a dock, transfers to a barge, and sails around the coast.</p>
+    ${routesNote}
+    ${tally}
     ${detail}
     <p class="hint">Hover a corridor, hub or route for its ids. Agents never see a map; they see these ids and the numbers behind them.</p>`;
 }
@@ -99,11 +138,23 @@ function reassessmentPanel(S) {
   const log = ck.revision_log.length ? ck.revision_log.map((l) => `<li><b>${esc(l.action)}</b> ${esc(l.claim_id)}${l.rationale_claims?.length ? ` <span class="muted">(because ${l.rationale_claims.map(esc).join(', ')})</span>` : ''}</li>`).join('') : '<li class="muted">empty log</li>';
   const routeRows = (sel ? [sel] : ck.routes).map((r) => `<tr class="${r.legs.some((l) => l.voided_hits.length) ? 'aff' : ''}"><td>${esc(r.route_id)}</td><td>${r.legs.map((l) => `<i class="sw sw-${l.mode}" title="${MODE_LABEL[l.mode]}"></i>`).join('')}</td><td>${esc([...new Set(r.legs.map((l) => monthSpan(l.months)))].join(', '))}</td><td class="num">${fmtUsd(r.cost_per_gallon, 2)}</td><td class="num">${r.facilities_served.length}</td><td>${r.legs.some((l) => l.voided_hits.length) ? '<span class="bad">voided edge</span>' : ''}</td></tr>`).join('');
   const judge = run.judge ? `${run.judge[s.cp] ?? '–'} / 4 (run mean ${run.judge.run_mean ?? '–'})` : '–';
+  // seasonality of what the agents scheduled, for the slider's month
+  const mon = MONTHS[s.month - 1];
+  let scheduled = 0, closed = 0;
+  for (const r of ck.routes) for (const l of r.legs) {
+    if (!(l.month_list || []).includes(s.month)) continue;
+    scheduled += 1;
+    const g = l.geom ? DATA.geoms[l.geom] : null;
+    if (g && !((g.months >> (s.month - 1)) & 1)) closed += 1;
+  }
+  const seasonLine = `<div><span>In ${esc(mon)}</span>${scheduled} leg${scheduled === 1 ? '' : 's'} scheduled` +
+    (closed ? `, <b class="warn">${closed} on edges that are not passable in ${esc(mon)}</b>` : (scheduled ? ', all on passable edges' : '')) + `</div>`;
   return `<h3>${esc(run.label)} · ${esc(s.cp)} report</h3>
     <p class="verbatim">AI-generated report (${esc(run.model)}), shown exactly as saved on ${s.cp === 'plan' ? 'the first' : s.cp === 'revision' ? 'the second' : 'the third'} checkpoint of ${esc(run.run_id)}. Mistakes are part of the record.</p>
     <div class="kv">
       <div><span>Routes</span><b>${ck.n_routes}</b> · ${ck.n_legs} legs · months ${ck.months_with_service.map((m) => MONTHS[m - 1]).join(', ') || '–'}</div>
       <div><span>Legs through voided edges</span><b class="${ck.routes_through_voided ? 'bad' : 'ok'}">${ck.routes_through_voided}</b>${s.cp === 'plan' ? ' <span class="muted">(notice not yet delivered)</span>' : ''}</div>
+      ${seasonLine}
       <div><span>Claims</span>${ck.claims.length} · judge ${judge}</div>
       <div><span>Run</span>${fmtUsd(run.usd)} · ${esc(run.wall)} · ${fmtInt(run.llm_calls)} model calls</div>
     </div>

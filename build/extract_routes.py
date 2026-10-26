@@ -42,8 +42,12 @@ class GeomStore:
             for m, run in runs:
                 for pl in self.net.polyline(run, ROUTE_TOL_M, f"{where}/{m}"):
                     parts.append([m, flat(pl)])
+            months = 0xFFF
+            for e in eids:
+                months &= self.net.edge_months.get(e, 0)
             self.geoms[gid] = {"n_edges": len(eids),
                                "modes": self.net.modes_of(eids),
+                               "months": months,          # months in which every edge is passable
                                "parts": parts}
         return gid
 

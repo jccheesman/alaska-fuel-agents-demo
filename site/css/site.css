@@ -212,6 +212,8 @@ details.wide > summary { cursor: pointer; font-weight: 500; color: var(--accent)
 .sw-voided { background: var(--voided); height: 6px; }
 .sw-affected { background: var(--voided); }
 .sw-calm { background: var(--ink-3); }
+.sw-closed { background: repeating-linear-gradient(90deg, var(--warning) 0 3px, transparent 3px 5px); height: 6px; }
+.warn { color: var(--warning); }
 .sw-ghost { background: repeating-linear-gradient(90deg, var(--ink-3) 0 4px, transparent 4px 7px); }
 .sw-ring { background: var(--mode-barge); box-shadow: 0 0 0 2px color-mix(in oklab, var(--voided) 60%, transparent); }
 .sw-served, .sw-unserved, .sw-remote, .sw-transfer-pt, .sw-hub { width: 10px; height: 10px; border-radius: 50%; }

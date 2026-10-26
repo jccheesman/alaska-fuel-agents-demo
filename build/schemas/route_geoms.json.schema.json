@@ -26,11 +26,17 @@
      "minItems": 2,
      "maxItems": 2
     }
+   },
+   "months": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 4095
    }
   },
   "required": [
    "n_edges",
-   "parts"
+   "parts",
+   "months"
   ]
  },
  "$schema": "https://json-schema.org/draft/2020-12/schema"

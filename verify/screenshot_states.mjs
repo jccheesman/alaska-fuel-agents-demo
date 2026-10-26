@@ -16,6 +16,8 @@ mkdirSync(OUT, { recursive: true });
 const VIEWS = [
   ['baseline', '#map?state=baseline&month=9'],
   ['baseline-feb-nome', '#map?state=baseline&month=2&req=hub:h000493'],
+  ['baseline-feb-all', '#map?state=baseline&month=2'],
+  ['reassessment-mass-feb', '#map?state=reassessment&topo=mass&cp=reassessment&month=2'],
   ['disruption', '#map?state=disruption'],
   ['disruption-nome', '#map?state=disruption&req=hub:h000493'],
   ['after-nome', '#map?state=after&req=hub:h000493'],

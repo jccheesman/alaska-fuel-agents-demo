@@ -107,6 +107,7 @@ export function createMap(container, DATA) {
     map.setPaintProperty('routes-transfer', 'circle-color', c.transfer);
     map.setPaintProperty('routes-transfer', 'circle-stroke-color', cssVar('--surface'));
     for (const id of ['voided-edges', 'voided-corridors']) map.setPaintProperty(id, 'line-color', c.voided);
+    map.setPaintProperty('routes-closed-ring', 'line-color', c.warning);
     map.setPaintProperty('voided-edge-points', 'circle-color', c.voided);
     map.setPaintProperty('voided-edge-points', 'circle-stroke-color', cssVar('--surface'));
     map.setPaintProperty('voided-facilities', 'circle-color', c.voided);
@@ -149,6 +150,8 @@ export function createMap(container, DATA) {
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: { 'line-color': '#fff', 'line-width': ['case', ['==', ['get', 'voided'], true], 9, ['==', ['get', 'selected'], true], 7, 4.5],
         'line-opacity': ['case', ['==', ['get', 'voided'], true], 1, 0.85] } });
+    map.addLayer({ id: 'routes-closed-ring', type: 'line', source: 'routes', filter: ['==', ['get', 'closed'], true],
+      layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fab219', 'line-width': 8, 'line-opacity': 0.7, 'line-dasharray': [1, 1.2] } });
     map.addLayer({ id: 'routes-voided-ring', type: 'line', source: 'routes', filter: ['==', ['get', 'voided'], true],
       layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d03b3b', 'line-width': 7, 'line-opacity': 0.55 } });
     map.addLayer({ id: 'routes', type: 'line', source: 'routes', filter: ['!=', ['get', 'ghost'], true],
@@ -246,6 +249,7 @@ export function createMap(container, DATA) {
         return `<b>${esc(p.title || 'Route')}</b><br>${esc(MODE_LABEL[p.mode] || p.mode)} leg${p.months ? ` · ${esc(p.months)}` : ''}<br>` +
           `${p.cost != null ? `${fmtUsd(p.cost, 3)}/gal · ` : ''}${p.km != null ? fmtKm(p.km) : ''}` +
           `${p.voided ? `<br><span class="bad">crosses a voided element: ${esc(p.voided_hits)}</span>` : ''}` +
+          `${p.closed ? '<br><span class="warn">scheduled in a month when its edges are not passable</span>' : ''}` +
           `${p.note ? `<br><span class="muted">${esc(p.note)}</span>` : ''}`;
       case 'routes-transfer':
         return `<b>Transfer</b> · fuel changes carrier here<br><span class="muted">${esc(p.title || '')}</span>`;

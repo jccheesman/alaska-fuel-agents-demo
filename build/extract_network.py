@@ -69,6 +69,11 @@ class Network:
             self.hub_by_pid[pid("hub", hpid)] = {"hub_id": hub_id, "node_id": node_id,
                                                  "name": name, "community": community,
                                                  "region": region}
+        # passable months per edge, as a 12-bit mask (bit m-1 = month m)
+        self.edge_months: dict[int, int] = {}
+        for eid, month in con.execute(
+                "SELECT edge_id, month FROM edge_month_weights WHERE passable").fetchall():
+            self.edge_months[eid] = self.edge_months.get(eid, 0) | (1 << (month - 1))
         self.breaks: list[str] = []
 
     def resolve_edges(self, edge_pids: list[str], where: str) -> list[int]:

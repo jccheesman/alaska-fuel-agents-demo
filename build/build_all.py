@@ -22,6 +22,7 @@ from common import BuildError, PALETTE, MODE_LABEL, check_pin, write_json  # noq
 from extract_network import Network, extract_corridors, extract_facilities, extract_hubs, passable_counts  # noqa: E402
 from extract_disruption import extract_disruption, load_d2  # noqa: E402
 from extract_routes import GeomStore, extract_reference  # noqa: E402
+from extract_monthly import compute_monthly  # noqa: E402
 from extract_runs import extract_runs  # noqa: E402
 from extract_text import extract_text  # noqa: E402
 
@@ -79,6 +80,9 @@ def main() -> int:
     store = GeomStore(net)
     reference = extract_reference(net, store, out, hubs)
     print(f"reference routes: {reference['n_requests']} requests, {reference['n_affected_cost']} affected (cost)")
+    reference["monthly"] = compute_monthly(net, store, harness, reference)
+    write_json(out / "reference_routes.json", reference)
+    print("monthly cheapest paths computed with the harness router; September matches the frozen reference")
     disruption = extract_disruption(net, harness, out, d2, reference)
     runs = extract_runs(net, store, harness, out, args.img, voided_edges,
                         fresh_run=args.fresh_run, fresh_label=args.fresh_label,

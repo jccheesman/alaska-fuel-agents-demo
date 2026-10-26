@@ -68,21 +68,38 @@ export class MapStates {
   }
 
   // ---- features per state -------------------------------------------------
+  // The month the routes are drawn for. States 2 and 3 are the D2 answer key,
+  // which the harness computed for September (a fall storm); state 1 follows
+  // the slider and uses the per-month cheapest paths.
+  routeMonth() { return (this.s.state === 'disruption' || this.s.state === 'after') ? 9 : this.s.month; }
+
+  // Per-month cheapest path to a hub (null when the hub is unreachable that month).
+  monthlyRoute(dest) {
+    const m = this.DATA.reference.monthly?.[String(this.routeMonth())];
+    return m ? m[dest] : undefined;
+  }
+
   referenceFeatures(phase, { tone = 'mode', ghost = false, onlySelected = false } = {}) {
     const { DATA, s } = this;
     const out = [];
+    const month = this.routeMonth();
+    const useMonthly = s.state === 'baseline' && s.obj === 'cost' && month !== 9 && DATA.reference.monthly;
     for (const req of DATA.reference.requests) {
       const selected = s.req === req.dest;
       if (s.req !== 'all' && !selected && onlySelected) continue;
-      const o = req.objectives[s.obj][phase];
+      let o = req.objectives[s.obj][phase];
+      if (useMonthly) {
+        o = this.monthlyRoute(req.dest);
+        if (!o) continue;                 // unreachable this month: nothing to draw
+      }
       const affected = (req.objectives[s.obj].baseline.uses_closed_edges || []).length > 0;
       const t = tone === 'affected' ? (affected ? 'affected' : 'calm') : (s.req !== 'all' && !selected ? 'calm' : 'mode');
       out.push(...geomFeatures(DATA, o.geom, {
-        title: `Anchorage → ${req.dest_label} (${phase === 'baseline' ? 'before the storm' : 'after reroute'}, ${s.obj === 'cost' ? 'cheapest' : 'shortest'})`,
+        title: `Anchorage → ${req.dest_label} (${phase === 'baseline' ? (useMonthly ? 'cheapest in ' + MONTHS[month - 1] : 'before the storm') : 'after reroute'}, ${s.obj === 'cost' ? 'cheapest' : 'shortest'})`,
         req: req.dest, cost: o.cost_per_gallon, km: o.length_km, n_edges: o.n_edges,
-        selected, tone: t, ghost, affected,
-        months: 'September', voided: false, voided_hits: '',
-        note: affected && phase === 'baseline' ? `crosses ${o.uses_closed_edges.join(', ')}` : '',
+        selected, tone: t, ghost, affected: useMonthly ? false : affected,
+        months: MONTHS[month - 1], voided: false, voided_hits: '', closed: false,
+        note: !useMonthly && affected && phase === 'baseline' ? `crosses ${o.uses_closed_edges.join(', ')}` : '',
       }));
     }
     // draw the selected request last so it sits on top
@@ -101,12 +118,17 @@ export class MapStates {
       for (const leg of r.legs) {
         if (!leg.geom) continue;
         const dest = r.facilities_served?.length ? `${r.facilities_served.length} facilities` : 'no facilities listed';
+        const active = (leg.month_list || []).includes(s.month);          // scheduled in the slider's month
+        const g = DATA.geoms[leg.geom];
+        const closed = active && g && !((g.months >> (s.month - 1)) & 1);  // scheduled, but its edges are shut that month
         out.push(...geomFeatures(DATA, leg.geom, {
           title: `${r.route_id} · leg ${leg.i + 1} (${run.label}, ${s.cp})`,
           req: r.route_id, cost: leg.cost_per_gallon, km: leg.length_km, n_edges: leg.n_edges,
-          months: monthSpan(leg.months), selected, tone: s.req !== 'all' && !selected ? 'calm' : 'mode', ghost: false,
+          months: monthSpan(leg.months), selected, ghost: false,
+          tone: (!active || (s.req !== 'all' && !selected)) ? 'calm' : 'mode',
+          active, closed: Boolean(closed),
           voided: leg.voided_hits.length > 0, voided_hits: leg.voided_hits.join(', '),
-          note: dest,
+          note: dest + (active ? '' : ` · not scheduled in ${MONTHS[s.month - 1]}`) + (closed ? ` · edges closed in ${MONTHS[s.month - 1]}` : ''),
         }));
       }
     }
@@ -130,7 +152,7 @@ export class MapStates {
   apply(refit = false) {
     const { s, map } = this;
     map.ready(() => {
-      map.setMonth(s.month, this.activeModes());
+      map.setMonth(this.routeMonth(), this.activeModes());
       const dim = s.state === 'disruption' ? 0.22 : (s.state === 'baseline' ? 0.75 : 0.35);
       map.setCorridorOpacity(dim);
       map.showDisruption(s.state !== 'baseline');
@@ -163,6 +185,7 @@ export class MapStates {
 
   renderControls() {
     const { s, DATA, els } = this;
+    const pinned = s.state === 'disruption' || s.state === 'after';
     const reqOptions = s.state === 'reassessment'
       ? (DATA.runs.runs[s.topo]?.checkpoints[s.cp]?.routes || []).map((r) => [r.route_id, `${r.route_id} · ${r.legs.length} leg${r.legs.length > 1 ? 's' : ''}${r.legs.some((l) => l.voided_hits.length) ? ' ⚠' : ''}`])
       : DATA.reference.requests.map((r) => [r.dest, `${r.dest_label} (${r.dest.replace('hub:', '')})`]);
@@ -171,9 +194,14 @@ export class MapStates {
     const topoOpts = DATA.runs.order.map((t) => [t, DATA.runs.runs[t].label + (t === best ? ' · highest judge score' : '')]);
     els.controls.innerHTML = `
       <div class="ctl">
-        <label for="ctl-month">Month <span class="ctl-val">${MONTHS[s.month - 1]}</span></label>
-        <input id="ctl-month" type="range" min="1" max="12" step="1" value="${s.month}" aria-label="Month shown for corridors">
-        <div class="ctl-hint">${s.state === 'reassessment' ? 'Corridors follow the month; the agents chose their own months per leg.' : 'Corridors follow the month. The reference routes were computed for September.'}</div>
+        <label for="ctl-month">Month <span class="ctl-val">${MONTHS[this.routeMonth() - 1]}</span></label>
+        <input id="ctl-month" type="range" min="1" max="12" step="1" value="${this.routeMonth()}" aria-label="Month shown" ${pinned ? 'disabled' : ''}>
+        <div class="ctl-hint">${{
+          baseline: 'Corridors and the cheapest paths are recomputed for the month you choose (the harness router, cost objective).',
+          disruption: 'Pinned to September: D2 is a fall storm and its answer key was computed for September.',
+          after: 'Pinned to September: the reroute is the September answer key.',
+          reassessment: 'Legs the agents scheduled in this month are drawn solid; the rest are faded.',
+        }[s.state]}</div>
       </div>
       ${s.state !== 'reassessment' ? `
       <div class="ctl">
@@ -220,10 +248,10 @@ export class MapStates {
     const modeItems = MODES.map((m) => `<button type="button" class="lg-mode ${modes.includes(m) ? '' : 'off'}" data-mode="${m}" aria-pressed="${modes.includes(m)}">
         <i class="sw sw-${m}"></i>${MODE_LABEL[m]}</button>`).join('');
     const extra = {
-      baseline: '<span class="lg"><i class="sw sw-route"></i>reference route, colored by mode</span>',
+      baseline: '<span class="lg"><i class="sw sw-route"></i>cheapest path this month, colored by mode</span>',
       disruption: '<span class="lg"><i class="sw sw-voided"></i>voided by D2</span><span class="lg"><i class="sw sw-affected"></i>baseline route through a voided edge</span><span class="lg"><i class="sw sw-calm"></i>unaffected route</span>',
       after: '<span class="lg"><i class="sw sw-route"></i>rerouted (by mode)</span><span class="lg"><i class="sw sw-ghost"></i>old route</span><span class="lg"><i class="sw sw-voided"></i>voided by D2</span>',
-      reassessment: '<span class="lg"><i class="sw sw-route"></i>agent leg, by mode</span><span class="lg"><i class="sw sw-ring"></i>leg through a voided edge</span><span class="lg"><i class="sw sw-served"></i>served</span><span class="lg"><i class="sw sw-unserved"></i>unserved</span><span class="lg"><i class="sw sw-remote"></i>remote</span>',
+      reassessment: '<span class="lg"><i class="sw sw-route"></i>agent leg scheduled this month</span><span class="lg"><i class="sw sw-calm"></i>leg scheduled in another month</span><span class="lg"><i class="sw sw-ring"></i>leg through a voided edge</span><span class="lg"><i class="sw sw-closed"></i>scheduled in a month its edges are closed</span><span class="lg"><i class="sw sw-served"></i>served</span><span class="lg"><i class="sw sw-unserved"></i>unserved</span><span class="lg"><i class="sw sw-remote"></i>remote</span>',
     }[s.state];
     this.els.legend.innerHTML = `<div class="lg-modes" role="group" aria-label="Modes shown (corridors)">${modeItems}</div><div class="lg-extra">${extra}<span class="lg"><i class="sw sw-transfer-pt"></i>transfer point</span><span class="lg"><i class="sw sw-hub"></i>hub · <b>●</b> Anchorage supplier</span></div>`;
     this.els.legend.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => {

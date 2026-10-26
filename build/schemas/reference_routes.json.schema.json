@@ -125,11 +125,16 @@
      "objectives"
     ]
    }
+  },
+  "monthly": {
+   "type": "object",
+   "minProperties": 12
   }
  },
  "required": [
   "requests",
-  "anchorage_nome_v1"
+  "anchorage_nome_v1",
+  "monthly"
  ],
  "$schema": "https://json-schema.org/draft/2020-12/schema"
 }
