@@ -3,7 +3,7 @@
  "harness_branch": "refine-tools-MCP",
  "db_sha256": "a8b38b71dc7d16b9c3eecf0d83714552edbb9aaa1f81c4055e0fb5fd8a13d3d4",
  "db_bytes": 29896704,
- "built_at": "2026-10-26T21:05:34+00:00",
+ "built_at": "2026-10-26T21:11:48+00:00",
  "arm": "2026-10-22_bering_straits_annual_v1_deepseek-v3.2_fuse_seed20261022",
  "model": "DeepSeek V3.2 (via OpenRouter)",
  "palette": {
@@ -140,6 +140,6 @@
   "reference_routes.json": 18587,
   "route_geoms.json": 475924,
   "study_results.json": 2406,
-  "text_bundle.json": 87196
+  "text_bundle.json": 88293
  }
 }

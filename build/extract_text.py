@@ -90,16 +90,45 @@ def tool_bundle(harness: Path) -> dict:
         tools.append({"name": e["name"], "layer": e["layer"], "gate": e.get("gate"),
                       "terminal": e.get("terminal", False), "module": e.get("module"),
                       "purpose": e["purpose"]})
-    groups = {
-        "L1 · the network": [t for t in tools if t["layer"] == "L1" and not t["gate"]],
-        "L1 · report builder (DOE_MAS_REPORT_TOOLS)": [t for t in tools if t.get("gate") == "DOE_MAS_REPORT_TOOLS"],
-        "L1 · optional": [t for t in tools if t["layer"] == "L1" and t["gate"] and t["gate"] != "DOE_MAS_REPORT_TOOLS"],
-        "L2 · the disruption": [t for t in tools if t["layer"] == "L2"],
-        "L3 · the context documents": [t for t in tools if t["layer"] == "L3"],
-    }
+    # Grouped by what a tool does, not by the data layer that unlocks it; the
+    # layer stays on each tool as a badge.
+    by_job = [
+        ("Orient and look things up", "Learn the shape of the data and turn names into ids.",
+         ["describe", "resolve", "lookup", "read_node"]),
+        ("Route a delivery", "Cheapest or shortest paths for one month, checked the way the scorer checks them.",
+         ["route", "validate_routes", "perturb"]),
+        ("Regional scope", "A hub's neighborhood in the corridor graph: members, failure corridors and nodes, reach under a cost budget, its community.",
+         ["region"]),
+        ("Global scope", "The whole month graph at once: components, failure points, betweenness, reach.",
+         ["global_topology"]),
+        ("The disruption", "Appear only after the notice is delivered (layer L2).",
+         ["query_disruption_notice", "check_disruption_impact"]),
+        ("Context documents", "Appear only after the socio-economic release (layer L3).",
+         ["list_context_folders", "search_context", "read_context_document"]),
+        ("Re-read without spending budget", "Page through a receipt, a saved report, a document or a skill.",
+         ["read"]),
+        ("Build the report, piece by piece", "Open a checkpoint's report, commit routes, coverage and claims, log changes, dry-run the checks.",
+         ["begin_report", "set_summary", "add_route", "drop_route", "set_coverage", "add_claim",
+          "carry_forward", "log_revision", "retire_claim", "report_status", "check_report", "validate_report"]),
+        ("Submit", "The one call that ends a checkpoint; visible only to the submitting stage.",
+         ["finalize_report"]),
+        ("Optional: read-only SQL", "An experiment variant, off by default.",
+         ["query_sql"]),
+    ]
+    known = {t["name"] for t in tools}
+    placed = set()
+    groups = []
+    for title, blurb, names in by_job:
+        names = [n for n in names if n in known]
+        placed.update(names)
+        if names:
+            groups.append({"title": title, "blurb": blurb, "tools": names})
+    rest = sorted(known - placed)
+    if rest:
+        groups.append({"title": "Other", "blurb": "", "tools": rest})
     return {"version": reg.get("version"), "n_tools": reg.get("n_tools", len(tools)),
             "comment": reg.get("_comment", ""), "tools": tools,
-            "groups": {k: [t["name"] for t in v] for k, v in groups.items() if v}}
+            "groups": groups}
 
 
 def okf_bundle(harness: Path) -> dict:

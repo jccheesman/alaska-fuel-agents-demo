@@ -11,6 +11,10 @@
    "properties": {
     "n_tools": {
      "const": 29
+    },
+    "groups": {
+     "type": "array",
+     "minItems": 8
     }
    }
   },

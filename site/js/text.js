@@ -24,9 +24,10 @@ export function renderStart(DATA) {
     </details>`).join('');
   // tools
   const byName = Object.fromEntries(t.tools.tools.map((x) => [x.name, x]));
-  document.getElementById('tools-groups').innerHTML = Object.entries(t.tools.groups).map(([g, names]) => `
-    <div class="tool-group"><h4>${esc(g)} <span class="muted">(${names.length})</span></h4>
-      <ul class="tool-list">${names.map((n) => { const x = byName[n]; return `<li><details><summary><code>${esc(n)}</code>${x.terminal ? ' <span class="pill">ends the checkpoint</span>' : ''}</summary><p>${esc(x.purpose)}</p><p class="src">${esc(x.module)}</p></details></li>`; }).join('')}</ul></div>`).join('');
+  document.getElementById('tools-groups').innerHTML = t.tools.groups.map((g) => `
+    <div class="tool-group"><h4>${esc(g.title)} <span class="muted">(${g.tools.length})</span></h4>
+      ${g.blurb ? `<p class="muted small">${esc(g.blurb)}</p>` : ''}
+      <ul class="tool-list">${g.tools.map((n) => { const x = byName[n]; return `<li><details><summary><code>${esc(n)}</code> <span class="pill layer-${esc(x.layer)}">${esc(x.layer)}</span>${x.gate && x.gate !== 'DOE_MAS_REPORT_TOOLS' ? ` <span class="pill soft">${esc(x.gate.replace('DOE_MAS_', '').toLowerCase())}</span>` : ''}${x.terminal ? ' <span class="pill">ends the checkpoint</span>' : ''}</summary><p>${esc(x.purpose)}</p><p class="src">${esc(x.module)}</p></details></li>`; }).join('')}</ul></div>`).join('');
   document.getElementById('tools-count').textContent = t.tools.n_tools;
   // mcp
   document.getElementById('mcp-doc').textContent = t.mcp.docstring;
