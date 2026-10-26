@@ -35,11 +35,12 @@ async function main() {
   status.remove();
   window.DEMO = { DATA };
 
-  renderStart(DATA);
-  renderParadigms(DATA);
-  renderLifecycle(DATA);
-  renderResults(DATA);
-  renderAbout(DATA);
+  // Each reading section renders on its own, so a problem in one of them
+  // (for instance a stale cached data file) never stops the map from loading.
+  for (const [label, fn] of [['start', renderStart], ['paradigms', renderParadigms], ['lifecycle', renderLifecycle],
+    ['results', renderResults], ['about', renderAbout]]) {
+    try { fn(DATA); } catch (e) { console.error(`section ${label} failed to render:`, e); }
+  }
 
   setDefaultTopo(bestTopo(DATA));   // the fourth state opens on the highest-scoring team
   const mapApi = createMap('map', DATA);

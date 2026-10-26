@@ -20,7 +20,10 @@ export async function loadAll(onProgress) {
   const names = Object.keys(FILES);
   let done = 0;
   await Promise.all(names.map(async (name) => {
-    const res = await fetch(FILES[name], { cache: 'force-cache' });
+    // 'no-cache' revalidates with the server (GitHub Pages answers 304 when a
+    // file is unchanged), so a republished data file is never masked by a
+    // stale copy the way 'force-cache' would allow.
+    const res = await fetch(FILES[name], { cache: 'no-cache' });
     if (!res.ok) throw new Error(`${FILES[name]}: HTTP ${res.status}`);
     out[name] = await res.json();
     done += 1;
