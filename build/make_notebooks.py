@@ -133,8 +133,11 @@ the harness repository is private while the study is under way.
 # DuckDB 1.5.6 is the version the database was written with (schema_meta.duckdb_min)
 # and the one the extensions were validated on by the harness's VM tests.
 %pip -q install duckdb==1.5.6 pandas matplotlib requests
+"""),
+        code("""
 import duckdb, pandas as pd
 print("duckdb", duckdb.__version__)
+assert duckdb.__version__.startswith("1.5"), "expected DuckDB 1.5.x (the version the database was written with)"
 """),
         DB_DOWNLOAD_CELL,
         md("""
@@ -594,26 +597,30 @@ read from the run folder's grants.
 """),
         md("## 4 · Orient: describe, resolve, lookup"),
         code("""
-def call(name, **kw):
-    out = layer_tools.call_tool(name, **kw)
+def call(tool, /, **kw):          # positional-only, so a tool argument may itself be called `name`
+    out = layer_tools.call_tool(tool, **kw)
     view = json.loads(out)
-    print(f"{name} -> receipt {view.get('r_id')} ({view.get('rows_returned')} rows{', truncated view' if view.get('truncated') else ''})")
+    rid = view.get("r_id") or "no receipt (budget-free)"
+    print(f"{tool} -> {rid} ({view.get('rows_returned')} rows{', truncated view' if view.get('truncated') else ''})")
     return view
 
 d = call("describe")
-print([r["relation"] for r in d["data"]["relations"]][:12], "...")
-print("id kinds:", d["data"].get("id_kinds") or d["data"].get("ids"))
+print("relations:", [r["relation"] for r in d["data"]["relations"]][:12], "...")
+print("id kinds:", [k["public_id_form"] for k in d["data"]["kinds"]])
+print("objective:", d["data"]["objective"])
 """),
         code("""
 r = call("resolve", name="Nome")
-print(json.dumps(r["data"], indent=1)[:900])
-NOME = [m for m in r["data"]["matches"]][0]["hubs"][0] if r["data"].get("matches") else "hub:h000493"
+print(json.dumps({k: r["data"][k] for k in ("query", "matched_via", "status", "list_status", "community", "hubs")}, indent=1)[:1200])
+hubs = r["data"]["hubs"]
+NOME = hubs[0]["hub"] if hubs and isinstance(hubs[0], dict) else (hubs[0] if hubs else "hub:h000493")
 ANCHORAGE = "hub:h000698"
 print("Nome resolves to", NOME)
 """),
         code("""
 fac = call("lookup", kind="hub_facility_map", hub=NOME)
-print(json.dumps(fac["data"], indent=1)[:700])
+print(f"{len(fac['data'])} facilities mapped to Nome; first three:")
+print(json.dumps(fac["data"][:3], indent=1))
 """),
         md("""
 ## 5 · Route, and read the receipt
@@ -626,13 +633,14 @@ rt = call("route", hubs=[ANCHORAGE, NOME], month=9)
 legs = rt["data"]["legs"]
 for leg in legs:
     print(f"  leg {leg['leg']}: {leg['mode']:9s} {leg['n_edges']:5d} edges  ${leg['cost_per_gallon']:.3f}/gal  {leg['length_km']:.0f} km  {leg['first_edge']} .. {leg['last_edge']}")
-print("total", rt["data"].get("totals") or {k: rt["data"][k] for k in rt["data"] if k.startswith("total")})
+print(f"total: ${rt['data']['total_cost_per_gallon']:.3f}/gal over {rt['data']['total_length_m']/1000:.0f} km, {rt['data']['n_edges']} edges "
+      f"(circuitousness {rt['data']['circuitousness']})")
 ROUTE_RECEIPT = rt["r_id"]
 """),
         code("""
 # page through the receipt with the budget-free `read` tool
 page = call("read", handle=ROUTE_RECEIPT, select="data/legs/0", limit=5)
-print(json.dumps(page["data"], indent=1)[:600])
+print(json.dumps(page["data"]["value"], indent=1)[:600])
 """),
         md("""
 ## 6 · Deliver the storm notice and watch the surface grow
@@ -665,15 +673,18 @@ unmasked and the rerouted path side by side, with the cost delta. Its receipt co
 voided_edges = ["edge:e091382", "edge:e094423", "edge:e097314"]
 p = call("perturb", hub_a=ANCHORAGE, hub_b=NOME, month=9, avoid=voided_edges)
 d = p["data"]
-print("outcome:", d.get("outcome"))
-print("cost delta $/gal:", d.get("cost_delta") or d.get("delta_cost_per_gallon"), "| length delta km:", d.get("length_delta_km") or d.get("delta_length_km"))
-print("masked edges the old path used:", d.get("masked_edges_used") or d.get("used_masked_edges"))
+print("outcome:", d["outcome"])
+print("delta:", json.dumps(d["delta"]))
+print("masked edges the old path used:", d["unmasked_path_uses_masked_edges"])
+print("hubs cut off from Anchorage by the mask:", d["hubs_cut_off_from_origin"])
+for leg in d["legs"][:6]:
+    print("  reroute leg:", {k: leg[k] for k in ("leg", "mode", "n_edges", "cost_per_gallon", "length_km") if k in leg})
 """),
         md("## 8 · The concept map, one page per call"),
         code("""
 node = call("read_node", id=NOME)
-print(node["data"]["frontmatter"]["title"], "|", len(node["data"]["frontmatter"].get("links", [])), "links")
-print(node["data"].get("body", node["data"].get("text", ""))[:800])
+print(node["data"]["frontmatter"]["title"], "|", len(node["data"]["links"]), "typed links | built from database", node["data"]["frontmatter"]["built_from"])
+print(node["data"]["body"][:800])
 """),
         md("""
 ## 9 · The ledger an agent leaves behind
