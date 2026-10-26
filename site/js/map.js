@@ -181,9 +181,9 @@ export function createMap(container, DATA) {
 
     // labels as HTML markers: no glyph server needed. Priority decides who
     // wins when two labels collide: the origin, then Nome, then by facilities.
-    const labelled = hubFeatures.features.filter((f) => f.properties.role !== 'other');
-    labelled.sort((a, b) => prio(b.properties) - prio(a.properties));
-    for (const f of labelled) {
+    const labeled = hubFeatures.features.filter((f) => f.properties.role !== 'other');
+    labeled.sort((a, b) => prio(b.properties) - prio(a.properties));
+    for (const f of labeled) {
       const el = document.createElement('div');
       el.className = `hub-label ${f.properties.role}${f.properties.voided ? ' voided' : ''}`;
       el.textContent = labelText(f.properties);

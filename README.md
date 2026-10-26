@@ -7,7 +7,7 @@ team paradigms the study compares (`lin`, `crew`, `mass`, `self`).
 **Live site:** https://jccheesman.github.io/alaska-fuel-agents-demo/
 
 The page explains the vocabulary, shows the five skills and the 29 tools as the agents read
-them, walks the life of a run, and centres on an interactive map in four states:
+them, walks the life of a run, and centers on an interactive map in four states:
 
 1. **Before the storm** — the network the agents query (corridors by month and mode) and the
    reference routes from Anchorage to the 20 Bering Straits hubs.
@@ -70,7 +70,7 @@ verify/       headless-browser walkthrough
 
 * Data: the harness's `fuel_network.duckdb`, built from the public data repository
   [alaska-fuel-spatial-network](https://github.com/jccheesman/alaska-fuel-spatial-network).
-  Edge costs are modelled values (miles × friction × a per-mode rate), not observed prices.
+  Edge costs are modeled values (miles × friction × a per-mode rate), not observed prices.
 * Reference routes: `agentic_harness_workflow/tests/reference_answers/routes.json` (September,
   disruption D2).
 * Agent reports: the arm `run_archives/2026-10-22_bering_straits_annual_v1_deepseek-v3.2_fuse_seed20261022`,
@@ -83,7 +83,7 @@ verify/       headless-browser walkthrough
   read-only GitHub token from Colab Secrets (`GH_TOKEN`); the site itself needs no credentials
   because its data is committed here.
 
-## Licence
+## License
 
 Code: MIT (`LICENSE`). Text and derived data in `site/data/`, `notebooks/` and this README:
 CC BY 4.0 (`LICENSE-CONTENT.md`). Attribution: Julia Cheesman, Erin Trochim, Diego Arias Arana,

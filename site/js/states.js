@@ -220,7 +220,7 @@ export class MapStates {
     const modeItems = MODES.map((m) => `<button type="button" class="lg-mode ${modes.includes(m) ? '' : 'off'}" data-mode="${m}" aria-pressed="${modes.includes(m)}">
         <i class="sw sw-${m}"></i>${MODE_LABEL[m]}</button>`).join('');
     const extra = {
-      baseline: '<span class="lg"><i class="sw sw-route"></i>reference route, coloured by mode</span>',
+      baseline: '<span class="lg"><i class="sw sw-route"></i>reference route, colored by mode</span>',
       disruption: '<span class="lg"><i class="sw sw-voided"></i>voided by D2</span><span class="lg"><i class="sw sw-affected"></i>baseline route through a voided edge</span><span class="lg"><i class="sw sw-calm"></i>unaffected route</span>',
       after: '<span class="lg"><i class="sw sw-route"></i>rerouted (by mode)</span><span class="lg"><i class="sw sw-ghost"></i>old route</span><span class="lg"><i class="sw sw-voided"></i>voided by D2</span>',
       reassessment: '<span class="lg"><i class="sw sw-route"></i>agent leg, by mode</span><span class="lg"><i class="sw sw-ring"></i>leg through a voided edge</span><span class="lg"><i class="sw sw-served"></i>served</span><span class="lg"><i class="sw sw-unserved"></i>unserved</span><span class="lg"><i class="sw sw-remote"></i>remote</span>',

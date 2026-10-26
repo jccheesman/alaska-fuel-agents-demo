@@ -19,7 +19,7 @@ class GeomStore:
 
     def add(self, edge_pids: list[str], where: str, lenient: bool = False) -> str | None:
         """Store the polyline split into runs of one mode, so the map can
-        colour a road-then-barge route the way the harness's own figures do.
+        color a road-then-barge route the way the harness's own figures do.
         With lenient=True an unknown edge id (possible in a fresh run from the
         notebook) skips the geometry instead of failing the build."""
         gid = geom_id(edge_pids)

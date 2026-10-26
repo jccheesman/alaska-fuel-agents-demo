@@ -171,7 +171,7 @@ con.sql("SUMMARIZE SELECT latitude, longitude, delivery_method_1, qc_status FROM
 
 Nodes and edges are ordinary tables. **Edges have no geometry of their own**: a line is drawn from
 one node's coordinates to the other's. Every edge gets one row per month in `edge_month_weights`
-(friction and passability) and one in `edge_costs` (modelled cost per gallon).
+(friction and passability) and one in `edge_costs` (modeled cost per gallon).
 
 > **Callout — season is data, not code.** "Ice roads are open January to March" is not an `if`
 > statement anywhere in the harness. It is the `passable` flag on 1,282 ice-road edges in three of
@@ -398,7 +398,7 @@ GROUP BY 1 ORDER BY 2 DESC LIMIT 8
         md("""
 ## 8 · The **spatial** extension: coordinates, reprojection, GeoJSON out
 
-Node coordinates are stored in EPSG:3338 (NAD83 / Alaska Albers, metres). The spatial extension
+Node coordinates are stored in EPSG:3338 (NAD83 / Alaska Albers, meters). The spatial extension
 reprojects in SQL and exports GeoJSON that any GIS or web map can read.
 """),
         code("""

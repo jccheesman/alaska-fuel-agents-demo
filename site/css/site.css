@@ -1,7 +1,7 @@
 /* Layout: a reading column (max 1080px) for the explanatory sections, and a
    full-width band for the map with a side panel that stacks under the map on
-   phones. Neutrals carry a cold blue-grey bias (sea ice); the accent is a deep
-   harbour teal; the five mode colours are the harness's own. */
+   phones. Neutrals carry a cold blue-gray bias (sea ice); the accent is a deep
+   harbour teal; the five mode colors are the harness's own. */
 :root {
   --bg: #f3f5f7;
   --surface: #fcfcfb;

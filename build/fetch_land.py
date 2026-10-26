@@ -1,4 +1,4 @@
-"""Natural Earth land for the basemap, clipped to Alaska and its neighbours.
+"""Natural Earth land for the basemap, clipped to Alaska and its neighbors.
 
 Source: the public-domain Natural Earth vectors, mirrored on GitHub
 (nvkelso/natural-earth-vector). Longitudes east of the antimeridian are

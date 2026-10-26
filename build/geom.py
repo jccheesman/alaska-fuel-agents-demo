@@ -3,7 +3,7 @@
 The database stores edges as (from_node, to_node) pairs with arbitrary
 orientation and no geometry of their own, so a route or corridor is drawn by
 chaining its ordered edges into a node sequence and joining the nodes' lat/lon
-with straight segments. Douglas-Peucker runs on the EPSG:3338 metre
+with straight segments. Douglas-Peucker runs on the EPSG:3338 meter
 coordinates (so a tolerance is a real distance), and the survivors are
 emitted as rounded WGS84 [lon, lat] pairs.
 """

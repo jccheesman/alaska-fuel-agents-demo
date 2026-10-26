@@ -31,7 +31,7 @@ function baselinePanel(S) {
   return `<h3>The network the agents can query</h3>
     <p>Every line is a <b>corridor</b>: a run of edges between two hubs with one mode. Barge corridors open in open water, ice roads only January to March, roads and air all year. The straight-looking lines are drawn from node to node; the real geometry lives in shapefiles the agents never see either.</p>
     <p class="muted">${seasonal}</p>
-    <p>The coloured routes are the <b>reference answers</b>: the cheapest (or shortest) September path from the Anchorage supplier to each of the 20 Bering Straits hubs, computed by the harness's own router. The cheapest Anchorage → Nome delivery goes by road to a dock, transfers to a barge, and sails around the coast.</p>
+    <p>The colored routes are the <b>reference answers</b>: the cheapest (or shortest) September path from the Anchorage supplier to each of the 20 Bering Straits hubs, computed by the harness's own router. The cheapest Anchorage → Nome delivery goes by road to a dock, transfers to a barge, and sails around the coast.</p>
     ${detail}
     <p class="hint">Hover a corridor, hub or route for its ids. Agents never see a map; they see these ids and the numbers behind them.</p>`;
 }
@@ -62,7 +62,7 @@ function disruptionPanel(S) {
       <div><span>Symbolic</span>${d.voided.symbolic.map(id).join(' ')}</div>
     </div>
     ${selNote}
-    <p><b>${affected.length} of ${DATA.reference.n_requests}</b> ${s.obj === 'cost' ? 'cheapest' : 'shortest'} baseline routes cross a voided edge (drawn red); the others are grey. ${s.obj === 'length' ? 'The shortest paths fly, so none of them touched the dock.' : 'Air and direct ocean barge stay open on purpose: a team that voids them too loses precision.'}</p>
+    <p><b>${affected.length} of ${DATA.reference.n_requests}</b> ${s.obj === 'cost' ? 'cheapest' : 'shortest'} baseline routes cross a voided edge (drawn red); the others are gray. ${s.obj === 'length' ? 'The shortest paths fly, so none of them touched the dock.' : 'Air and direct ocean barge stay open on purpose: a team that voids them too loses precision.'}</p>
     <p class="hint">The impact tool answers only about ids a team asks about. Reading the notice tells you the whole port is closed to fuel transfer; the binding below says how the harness turned those words into ids.</p>
     <details><summary>How words became ids (declared approximations)</summary><ul class="small">${d.declared_approximations.map((a) => `<li>${esc(a)}</li>`).join('')}</ul></details>`;
 }
@@ -78,7 +78,7 @@ function afterPanel(S) {
   }).join('');
   const nome = DATA.reqByDest['hub:h000493'].objectives.cost;
   return `<h3>After the disruption: the reference reroute</h3>
-    <p>The same router, with the three voided edges removed from the month's graph. Solid lines are the new routes; a dashed grey line is the old route of the delivery you selected.</p>
+    <p>The same router, with the three voided edges removed from the month's graph. Solid lines are the new routes; a dashed gray line is the old route of the delivery you selected.</p>
     <p>For Nome the cheapest delivery rises from <b>${fmtUsd(nome.baseline.cost_per_gallon, 3)}</b> to <b>${fmtUsd(nome.post_closure.cost_per_gallon, 3)}</b> per gallon (+${fmtKm(nome.delta_km)}): the barge now lands at a different dock and the fuel finishes by road. ${DATA.reference.n_affected_cost} of 20 cheapest routes change; the 8 that never used the dock stay as they were.</p>
     <div class="tbl"><table><thead><tr><th>Hub</th><th class="num">before</th><th class="num">after</th><th class="num">extra</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="hint">This is the <b>answer key</b> the scorers hold, not an agent's work. The next state shows what the agent teams actually did.</p>`;

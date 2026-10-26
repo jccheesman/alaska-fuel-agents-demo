@@ -7,7 +7,7 @@ reproduced exactly as the agents saved them, including factual and planning erro
 study's own read-out documents. They are research records, not recommendations, and nothing on
 the site should be read as operational advice about fuel delivery in Alaska.
 
-**Modelled costs.** Every cost per gallon on the site is a modelled value from the data
+**Modeled costs.** Every cost per gallon on the site is a modeled value from the data
 pipeline (distance × environmental friction × a per-mode rate), not an observed price.
 
 **Scenario status.** The scenario and disruption files in the harness carry the status
@@ -16,4 +16,4 @@ provisional. The demo reflects the harness at one pinned commit.
 
 **Third-party components.** MapLibre GL JS (BSD-3-Clause), Natural Earth (public domain),
 IBM Plex (OFL 1.1). DuckDB and its community extensions (duckrouting, Onager, H3, spatial,
-DuckPGQ, fts) are used by the notebooks under their own licences and are not vendored here.
+DuckPGQ, fts) are used by the notebooks under their own licenses and are not vendored here.

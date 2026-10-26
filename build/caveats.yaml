@@ -1,6 +1,6 @@
 # Honest flags shown beside each archived report. Every line paraphrases the
 # arm's own read-out (run_archives/<arm>/FINDINGS.md and judge/) — nothing here
-# is a new judgement. Reports are shown exactly as the agents saved them.
+# is a new judgment. Reports are shown exactly as the agents saved them.
 labels:
   lin: "lin — fixed three-stage chain"
   crew: "crew — five CrewAI roles"
